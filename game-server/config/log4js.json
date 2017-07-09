@@ -66,7 +66,7 @@
     },
     {
       "type": "file",
-      "filename": "${opts:base}/logs/pomelo-${opts:serverId}.log",
+      "filename": "${opts:base}/logs/pomelo.log",
       "maxLogSize": 1048576,
       "layout": {
           "type": "basic"
@@ -86,7 +86,7 @@
     },
     {
       "type": "file",
-      "filename": "${opts:base}/logs/pomelo-rpc-${opts:serverId}.log",
+      "filename": "${opts:base}/logs/pomelo-rpc.log",
       "maxLogSize": 1048576,
       "layout": {
           "type": "basic"

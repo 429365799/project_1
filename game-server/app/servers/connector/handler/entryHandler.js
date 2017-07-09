@@ -1,51 +1,66 @@
-module.exports = function(app) {
-  return new Handler(app);
-};
-
-var Handler = function(app) {
-  this.app = app;
-};
+module.exports = app => {
+    return new Handler(app);
+}
 
 /**
- * New client entry.
- *
- * @param  {Object}   msg     request message
- * @param  {Object}   session current session object
- * @param  {Function} next    next step callback
- * @return {Void}
+ * 负责处理用户登录、离开、重连等逻辑
  */
-Handler.prototype.entry = function(msg, session, next) {
-  next(null, {code: 200, msg: 'game server is ok.'});
-};
+class Handler {
+    constructor(app) {
+        this.app = app;
+    }
 
-/**
- * Publish route for mqtt connector.
- *
- * @param  {Object}   msg     request message
- * @param  {Object}   session current session object
- * @param  {Function} next    next step callback
- * @return {Void}
- */
-Handler.prototype.publish = function(msg, session, next) {
-	var result = {
-		topic: 'publish',
-		payload: JSON.stringify({code: 200, msg: 'publish message is ok.'})
-	};
-  next(null, result);
-};
+    /**
+     * 新用户进入
+     * @param {object} msg 
+     * @param {object} session
+     * @param {function} next 
+     */
+    enter(msg, session, next) {
+        const sessionService = this.app.get('sessionService');
+        const username = msg.username;
+        const rid = msg.rid;
+        const uid = username + '---' + rid;
+        const sid = this.app.get('serverId');
 
-/**
- * Subscribe route for mqtt connector.
- *
- * @param  {Object}   msg     request message
- * @param  {Object}   session current session object
- * @param  {Function} next    next step callback
- * @return {Void}
- */
-Handler.prototype.subscribe = function(msg, session, next) {
-	var result = {
-		topic: 'subscribe',
-		payload: JSON.stringify({code: 200, msg: 'subscribe message is ok.'})
-	};
-  next(null, result);
-};
+        // 如果当前用户已经登录
+        if (!!sessionService.getByUid(uid)) {
+            next(null, {
+                code: 500,
+                msg: '当前用户已经登录',
+                error: true,
+            });
+            return;
+        }
+
+        // 绑定当前用户到当前session
+        session.bind(uid);
+        // 设置房间id到当前的session中
+        session.set('rid', rid);
+        // 同步房间id到原始session
+        session.push('rid', err => {
+            if(err) {
+                console.error('set rid for session service failed! error is : %j', err.stack);
+            }
+        });
+
+        session.on('closed', arg => {
+            this.app.rpc.chat.chatRemote.kickUser(session, uid, sid, rid, null);
+        });
+
+        // 将用户添加到channel
+        this.app.rpc.chat.chatRemote.addUser(
+            session,
+            rid,
+            true,
+            uid,
+            sid,
+            users => {
+                next(null, {
+                    code: 200,
+                    users: users
+                });
+            }
+        );
+    }
+}

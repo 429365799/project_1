@@ -16,43 +16,35 @@
     </script>
     <script src="js/lib/pomeloclient.js">
     </script>
-    <script type="text/javascript">
-      var pomelo = window.pomelo;
-      var host = "127.0.0.1";
-      var port = "3010";
-      function show() {
-        pomelo.init({
-          host: host,
-          port: port,
-          log: true
-        }, function() {
-        pomelo.request("connector.entryHandler.entry", "hello pomelo", function(data) {
-            alert(data.msg);
-          });
-        });
-      }
-    </script>
  
   </head>
   <body>
-    <div class="g-doc">
-      <div class="g-banner" style="border:none">
-        <div class="logo">
-          <div class="img"></div>
-        </div>
-      </div>
-      <div class="g-background">
-        <div class="g-content">
-          Welcome to Pomelo
-        </div>
-      </div>
-      <div class="g-link">
-        Home:
-        <a href="https://github.com/NetEase/pomelo">https://github.com/NetEase/pomelo</a>
-      </div>
-      <div class="g-button">
-        <input id="test" type="button" value="Test Game Server" onclick="show()"/>
-      </div>
+    <!--login-->
+    <div id="panel-login" class="container">
+      <header class="login-title">
+        Please Login
+      </header>
+      <main>
+        <section class="input-row">
+          <label for="username">User Name:</label>
+          <input id="username" type="text" name="username" placeholder="please input username">
+        </section>
+
+        <section class="input-row">
+          <label for="room">Room Name:</label>
+          <input id="room" type="text" name="room" placeholder="please input room name">
+        </section>
+      </main>
+      <footer>
+        <button class="submit" onclick="login()">Login</button>
+      </footer>
     </div>
+
+    <!--chat room-->
+    <div id="panel-room" class="chat-room">
+
+    </div>
+
+    <script type="text/javascript" src="js/client.js"></script>
   </body>
 </html>
