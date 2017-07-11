@@ -22,6 +22,11 @@ class Handler {
         const rid = msg.rid;
         const uid = username + '---' + rid;
         const sid = this.app.get('serverId');
+        const redis = this.app.get('redis');
+
+        // redis.lpush('user', uid, (err, rep) => {
+        //     console.log(err, rep);
+        // });
 
         // 如果当前用户已经登录
         if (!!sessionService.getByUid(uid)) {
